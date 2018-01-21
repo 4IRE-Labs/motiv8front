@@ -26515,8 +26515,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
-var ERC20TokenContract = __WEBPACK_IMPORTED_MODULE_4_truffle_contract___default()("0x97ce88c86d9e01e381495b2632109e5c9b4d0d6a", __WEBPACK_IMPORTED_MODULE_5__build_contracts_Motiv8ERC20Token_json___default.a['abi']);
-var M8BadgeToken = __WEBPACK_IMPORTED_MODULE_4_truffle_contract___default()("0xbaf7ad3d6e97d843a8b5d1bc7b3cd475d5521d2c", __WEBPACK_IMPORTED_MODULE_6__build_contracts_M8BadgeToken_json___default.a['abi']);
+var ERC20TokenContract = __WEBPACK_IMPORTED_MODULE_4_truffle_contract___default()(__WEBPACK_IMPORTED_MODULE_5__build_contracts_Motiv8ERC20Token_json___default.a);
+var ERC20TokenAddress = "0x97ce88c86d9e01e381495b2632109e5c9b4d0d6a";
+var M8BadgeToken = __WEBPACK_IMPORTED_MODULE_4_truffle_contract___default()(__WEBPACK_IMPORTED_MODULE_6__build_contracts_M8BadgeToken_json___default.a);
+var M8BadgeTokenAddress = "0xbaf7ad3d6e97d843a8b5d1bc7b3cd475d5521d2c";
 
 // var ERC20TokenContract = contract(“0x97ce88c86d9e01e381495b2632109e5c9b4d0d6a”, erc20_token_artifacts[‘abi’]);
 
@@ -26528,7 +26530,7 @@ var account;
 var hostUrl = "http://cryptstarter.io";
 var allBadgeChallenges;
 var allPointsChallenges;
-var testAccount = "0x4cc120790781c9b61bb8d9893d439efdf02e2d30"
+// var testAccount = "0x4cc120790781c9b61bb8d9893d439efdf02e2d30"
 
 var ChallengeType = { badge: 0, points: 1 }
 
@@ -26631,7 +26633,7 @@ window.App = {
     },
     updateAccountPoints: function () {
         var tokenInstance;
-        ERC20TokenContract.deployed().then(function (instance) {
+        ERC20TokenContract.at(ERC20TokenAddress).then(function (instance) {
             tokenInstance = instance;
             return tokenInstance.balanceOf.call(account);
         }).then(function (value) {
@@ -26648,7 +26650,7 @@ window.App = {
     loadAccountChallenges: function (account) {
         App.loadAllChallenges(function () {
             var tokenInstance;
-            M8BadgeToken.deployed().then(function (instance) {
+            M8BadgeToken.at(M8BadgeTokenAddress).then(function (instance) {
                 tokenInstance = instance;
                 return tokenInstance.tokensOfOwner.call(account);
             }).then(function (tokensIds) {
@@ -26656,22 +26658,22 @@ window.App = {
                 return App.loadBadgesByIdsPromise(tokensIds, tokenInstance);
             }).then(function(badges) {
                 App.createAndAppendSuccStatus("loadAccountChallengesBadges: " + JSON.stringify(badges));
-                // var accountChallenges = App.generateChallengesWithFullfiledBadges(badges);
-
-                var accountChallenges = [{"id":14,
-                    "address": "0x99a4572656eb49FFEEFbe9588f8e7ab0F8D6Eb5e",
-                    "title":"TEst",
-                    "description":" kadfk ahf sjhfkjas lfdsflaskf ",
-                    "reward_type":0,
-                    "created_at":"2018-01-21T07:41:13.459Z",
-                    "updated_at":"2018-01-21T07:41:13.459Z",
-                    badge: {
-                        challenge: "14",
-                        face: 2,
-                        mask: 4,
-                        color: 4,
-                        txHash: 35
-                    }}]
+                var accountChallenges = App.generateChallengesWithFullfiledBadges(badges);
+                //
+                // var accountChallenges = [{"id":14,
+                //     "address": "0x99a4572656eb49FFEEFbe9588f8e7ab0F8D6Eb5e",
+                //     "title":"TEst",
+                //     "description":" kadfk ahf sjhfkjas lfdsflaskf ",
+                //     "reward_type":0,
+                //     "created_at":"2018-01-21T07:41:13.459Z",
+                //     "updated_at":"2018-01-21T07:41:13.459Z",
+                //     badge: {
+                //         challenge: "14",
+                //         face: 2,
+                //         mask: 4,
+                //         color: 4,
+                //         txHash: 35
+                //     }}]
 
                 App.showGeneralBadgeChallenges(accountChallenges, App.createAccountBadgeChallengeTR);
                 App.drawBadges(badges);
@@ -26911,7 +26913,7 @@ window.App = {
     
     configureAdminMenu: function (currentAccount) {
         var tokenInstance;
-        ERC20TokenContract.deployed().then(function (instance) {
+        ERC20TokenContract.at(ERC20TokenAddress).then(function (instance) {
             tokenInstance = instance;
             return tokenInstance.owner.call();
         }).then(function (value) {
@@ -26930,7 +26932,7 @@ window.App = {
 
     // watchTokenEvents: function () {
     //     var tokenInstance;
-    //     ERC20TokenContract.deployed().then(function (instance) {
+    //     ERC20TokenContract.at(ERC20TokenAddress).then(function (instance) {
     //         tokenInstance = instance;
     //         tokenInstance.allEvents({}, {fromBlock: 0, toBlock: 'latest'}).watch(function (error, result) {
     //             var alertbox = document.createElement("div");
