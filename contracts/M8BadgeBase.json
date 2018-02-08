@@ -79,8 +79,8 @@
       "type": "event"
     }
   ],
-  "bytecode": "0x6060604052341561000f57600080fd5b6101a98061001e6000396000f30060606040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630c83f54c1461005157806332ff7279146100b4575b600080fd5b341561005c57600080fd5b6100726004808035906020019091905050610117565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156100bf57600080fd5b6100d5600480803590602001909190505061014a565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60016020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60036020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a7230582066ca39884ba8d71c9c2a1f4b2c4f57c1758009fcf6d39b915a81a4144bfe614c0029",
-  "deployedBytecode": "0x60606040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630c83f54c1461005157806332ff7279146100b4575b600080fd5b341561005c57600080fd5b6100726004808035906020019091905050610117565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156100bf57600080fd5b6100d5600480803590602001909190505061014a565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60016020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60036020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a7230582066ca39884ba8d71c9c2a1f4b2c4f57c1758009fcf6d39b915a81a4144bfe614c0029",
+  "bytecode": "0x6060604052341561000f57600080fd5b6101a98061001e6000396000f30060606040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630c83f54c1461005157806332ff7279146100b4575b600080fd5b341561005c57600080fd5b6100726004808035906020019091905050610117565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156100bf57600080fd5b6100d5600480803590602001909190505061014a565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60016020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60036020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a72305820696a294cd162cc3c38d2610e26cf072419827a2c52bfcd8a623886ebe61391810029",
+  "deployedBytecode": "0x60606040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630c83f54c1461005157806332ff7279146100b4575b600080fd5b341561005c57600080fd5b6100726004808035906020019091905050610117565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156100bf57600080fd5b6100d5600480803590602001909190505061014a565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60016020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60036020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff16815600a165627a7a72305820696a294cd162cc3c38d2610e26cf072419827a2c52bfcd8a623886ebe61391810029",
   "sourceMap": "26:2801:1:-;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "26:2801:1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;723:53;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1223:56;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;723:53;;;;;;;;;;;;;;;;;;;;;;:::o;1223:56::-;;;;;;;;;;;;;;;;;;;;;;:::o",
   "source": "pragma solidity ^0.4.17;\n\ncontract M8BadgeBase {\n\n    /// @dev Creation event is emitted every time when new badge comes into existence\n    event Creation(address owner, uint256 badgeId);\n\n    /// @dev Transfer event as defined in current draft of ERC721. Emitted every time a badge\n    /// ownership is assigned\n    event Transfer(address from, address to, uint256 tokenId);\n\n    struct M8Badge {\n        uint txHash;\n        string challenge;\n        uint face;\n        uint mask;\n        uint color;\n    }\n\n    M8Badge[] badges; \n\n    /// @dev A mapping from badge IDs to _createBadge the address that owns them. All badges have\n    ///  some valid owner address, even gen0 badges are created with a non-zero owner.\n    mapping (uint256 => address) public badgeIndexToOwner;\n\n    // @dev A mapping from owner address to count of tokens that address owns.\n    //  Used internally inside balanceOf() to resolve ownership count.\n    mapping (address => uint256) ownershipTokenCount;\n\n    /// @dev A mapping from BadgeIDs to an address that has been approved to call\n    ///  transferFrom(). Each Badge can only have one approved address for transfer\n    ///  at any time. A zero value means no approval is outstanding.\n    mapping (uint256 => address) public badgeIndexToApproved;\n\n    /// @dev Assigns ownership of a specific badge to an address.\n    function _transfer(address _from, address _to, uint256 _tokenId) internal {\n        // Since the number of kittens is capped to 2^32 we can't overflow this\n        ownershipTokenCount[_to]++;\n        // transfer ownership\n        badgeIndexToOwner[_tokenId] = _to;\n        // When creating new kittens _from is 0x0, but we can't account that address.\n        if (_from != address(0)) {\n            ownershipTokenCount[_from]--;\n            // clear any previously approved ownership exchange\n            delete badgeIndexToApproved[_tokenId];\n        }\n        // Emit the transfer event.\n        Transfer(_from, _to, _tokenId);\n    }\n\n    function _createBadge(uint _txHash, string _challenge, address _owner) internal returns (uint) {\n\n        M8Badge memory _badge = M8Badge({\n            txHash: _txHash,\n            challenge: _challenge,\n            face: uint(keccak256(now))%8,\n            mask: uint(keccak256(now + 1))%4,\n            color: uint(keccak256(now + 2))%20\n        });\n\n        uint256 newBadgeId = badges.push(_badge) - 1;\n        \n        // It's probably never going to happen, 4 billion badges is A LOT, but\n        // let's just be 100% sure we never let this happen.\n        require(newBadgeId == uint256(uint32(newBadgeId)));\n\n        Creation(_owner, newBadgeId);\n\n        // This will assign ownership, and also emit the Transfer event as\n        // per ERC721 draft\n        _transfer(0, _owner, newBadgeId);\n\n        return newBadgeId;\n    }\n}",
@@ -1529,7 +1529,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 1566,
+                                          "referencedDeclaration": 1406,
                                           "type": "function () pure returns (bytes32)",
                                           "value": "keccak256"
                                         },
@@ -1543,7 +1543,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 1574,
+                                          "referencedDeclaration": 1414,
                                           "type": "uint256",
                                           "value": "now"
                                         },
@@ -1658,7 +1658,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 1566,
+                                          "referencedDeclaration": 1406,
                                           "type": "function () pure returns (bytes32)",
                                           "value": "keccak256"
                                         },
@@ -1687,7 +1687,7 @@
                                               "overloadedDeclarations": [
                                                 null
                                               ],
-                                              "referencedDeclaration": 1574,
+                                              "referencedDeclaration": 1414,
                                               "type": "uint256",
                                               "value": "now"
                                             },
@@ -1824,7 +1824,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 1566,
+                                          "referencedDeclaration": 1406,
                                           "type": "function () pure returns (bytes32)",
                                           "value": "keccak256"
                                         },
@@ -1853,7 +1853,7 @@
                                               "overloadedDeclarations": [
                                                 null
                                               ],
-                                              "referencedDeclaration": 1574,
+                                              "referencedDeclaration": 1414,
                                               "type": "uint256",
                                               "value": "now"
                                             },
@@ -2098,7 +2098,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 1575,
+                              "referencedDeclaration": 1415,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -2465,9 +2465,9 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.18+commit.9cf6e910.Emscripten.clang"
+    "version": "0.4.19+commit.c4cbbb05.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-01-22T13:47:48.258Z"
+  "updatedAt": "2018-02-08T19:50:43.798Z"
 }
