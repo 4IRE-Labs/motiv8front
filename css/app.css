@@ -9,6 +9,7 @@ html, body {
 	height: 100%;
 	overflow-y: auto;
   	overflow-x: hidden;
+	min-height: 500px;
 }
 
 .container--S {
@@ -16,7 +17,7 @@ html, body {
 	margin: auto;
 }
 
-#container_page_inner {
+#container_page_out {
 	min-height: 100%;
 }
 
